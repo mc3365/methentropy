@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "methentropy: depth-matched null models for 4-CpG methylation entropy"
+type: software
+authors:
+  - family-names: Cui
+    given-names: Meiying
+    affiliation: Yale University
+version: 3.0.0
+date-released: 2026-11-13
+repository-code: "https://github.com/mc3365/methentropy"
+keywords:
+  - DNA methylation
+  - methylation entropy
+  - epiallele
+  - bisulfite sequencing

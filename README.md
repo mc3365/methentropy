@@ -1,5 +1,7 @@
 # methentropy
 
+**Author:** Meiying Cui ([@mc3365](https://github.com/mc3365)), Yale University
+
 Depth-matched null models for 4-CpG methylation entropy computed by
 [RLM](https://github.com/sarahet/RLM) from bisulfite sequencing data.
 
@@ -93,6 +95,22 @@ smaller than the number of windows because most windows are near 0% or 100%.
 Use a larger `--chunksize` (if memory allows) to reuse keys across more windows,
 `--max-coverage` to drop very deep repeat windows, and `--nsims 500` for a
 quick pass. The smallest attainable p-value is `1 / (nsims + 1)`.
+
+## Author and credit
+
+The scientific idea behind this tool is by **Meiying Cui**: separating biological
+methylation heterogeneity from the entropy expected from methylation level
+alone, by placing observed 4-CpG entropy between a theoretical minimum and a
+stochastic reference. She designed the test, wrote and optimised the original
+implementation (`rlm_simulation`: the exhaustive minimum-entropy lookup, the
+fixed-methylation stochastic simulation and its parallel HPC version) and
+developed the metaplot visualisation of observed, stochastic and minimum
+entropy around genomic features.
+
+Version 3 (depth matching, per-CpG independence null, statistics, packaging)
+builds on that design and was developed by Meiying Cui with AI-assisted coding.
+
+If you use this software, please cite it as described in `CITATION.cff`.
 
 ## Citation
 
