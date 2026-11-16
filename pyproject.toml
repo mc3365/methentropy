@@ -8,6 +8,7 @@ version = "3.0.0"
 description = "Depth-matched null models for 4-CpG methylation entropy from RLM output"
 readme = "README.md"
 authors = [{ name = "Meiying Cui" }]
+license = { text = "MIT" }
 requires-python = ">=3.9"
 dependencies = ["numpy>=1.21", "pandas>=1.3"]
 

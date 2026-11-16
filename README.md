@@ -112,6 +112,10 @@ builds on that design and was developed by Meiying Cui with AI-assisted coding.
 
 If you use this software, please cite it as described in `CITATION.cff`.
 
+## License
+
+MIT License, Copyright (c) 2026 Meiying Cui. See [LICENSE](LICENSE).
+
 ## Citation
 
 If you use RLM output, cite Hetzel et al., "RLM: fast and simplified extraction
