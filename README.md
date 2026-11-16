@@ -69,6 +69,37 @@ methentropy lookup --nreads 16 32 128 -o min_entropy_lookup.tsv
 
 `scripts/slurm_methentropy.sh` is a SLURM template for several passages.
 
+## Figures
+
+Needs matplotlib: `pip install -e '.[plot]'`.
+
+```bash
+# metaplot over scaled regions (v1 design), replicates averaged per condition
+methentropy metaplot \
+    -s "Unpassaged=p_1_1.tsv.gz,p_1_2.tsv.gz,p_1_3.tsv.gz" \
+    -s "Passage 0=p0_1.tsv.gz,p0_2.tsv.gz,p0_3.tsv.gz" \
+    -s "Passage 5=p5_1.tsv.gz,p5_2.tsv.gz,p5_3.tsv.gz" \
+    -r DMVs_label.bed --names hyper_dmvs.txt --region-label DMV \
+    --title "Hyper DMVs" -o figs/hyper_dmv
+
+# per-sample QC
+methentropy qc -i p5_1.tsv.gz -o figs/p5_1
+```
+
+`metaplot` writes `<prefix>_metaplot.{png,pdf}` (one row per condition:
+observed, stochastic null, bimodal, minimum, methylation; and observed − null),
+`<prefix>_delta_overlay.{png,pdf}` (observed − null of all conditions on one
+axis) and `<prefix>_profile.tsv` (the plotted numbers). Regions are scaled to
+`--body-bins` (47) with `--flank` (2 kb) in `--bin-size` (200 bp) bins on both
+sides, matching EnrichedHeatmap `extend = 2000, w = 200, target_ratio = 0.7`.
+`--names` keeps regions whose `--name-column` (default 4) is listed in a file.
+
+`qc` writes `<prefix>_qc.png` and `<prefix>_qc_summary.tsv`: entropy vs
+methylation with the references, the distribution of observed − null, observed −
+null by read depth (flat = depth effect removed) and the p-value histogram.
+Windows whose null has no spread (e.g. fully methylated) give p = 1, which shows
+up as a bar at 1.
+
 ## Output of `run`
 
 | column | meaning |

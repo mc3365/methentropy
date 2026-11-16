@@ -59,6 +59,30 @@ def main(argv=None):
     c.add_argument("--max-coverage", type=int, default=1000)
     c.add_argument("--details", help="optional TSV with per-window calibration results")
 
+    mp = sub.add_parser("metaplot", help="median profile over scaled regions (v1 metaplot design)")
+    mp.add_argument("-s", "--sample", action="append", required=True, metavar="LABEL=FILE[,FILE...]",
+                    help="one condition: label and its replicate result files (repeat per condition; "
+                         "order = plot order)")
+    mp.add_argument("-r", "--regions", required=True, help="BED: chrom start end [name ...]")
+    mp.add_argument("--names", help="keep only regions whose name (see --name-column) is listed "
+                                    "in this file (first whitespace-separated column)")
+    mp.add_argument("--name-column", type=int, default=4, help="1-based BED column for --names")
+    mp.add_argument("-o", "--output-prefix", required=True)
+    mp.add_argument("--title")
+    mp.add_argument("--region-label", default="region", help="e.g. DMV or CGI, for panel titles")
+    mp.add_argument("--flank", type=int, default=2000)
+    mp.add_argument("--bin-size", type=int, default=200)
+    mp.add_argument("--body-bins", type=int, default=47)
+    mp.add_argument("--smooth", type=int, default=3, help="moving-average width in bins (1 = off)")
+    mp.add_argument("--formats", default="png,pdf")
+
+    qp = sub.add_parser("qc", help="four-panel QC figure for one result file")
+    qp.add_argument("-i", "--input", required=True, help="output of 'methentropy run'")
+    qp.add_argument("-o", "--output-prefix", required=True)
+    qp.add_argument("--fraction", type=float, default=0.05, help="fraction of windows plotted")
+    qp.add_argument("--title")
+    qp.add_argument("--formats", default="png")
+
     lk = sub.add_parser("lookup", help="write exact minimum / bimodal entropy for given depths")
     lk.add_argument("--nreads", type=int, nargs="+", required=True)
     lk.add_argument("-o", "--output", required=True)
@@ -84,6 +108,26 @@ def main(argv=None):
         print(json.dumps(summary, indent=2))
         if args.details:
             details.to_csv(args.details, sep="\t", index=False, float_format="%.6g")
+    elif args.command == "metaplot":
+        from .plotting import metaplot
+        samples = {}
+        for spec in args.sample:
+            if "=" not in spec:
+                raise ValueError(f"--sample needs LABEL=FILE[,FILE...], got {spec!r}")
+            label, files = spec.split("=", 1)
+            samples[label] = [f for f in files.split(",") if f]
+        paths, _ = metaplot(samples, args.regions, args.output_prefix, names_path=args.names,
+                            name_column=args.name_column, title=args.title,
+                            flank=args.flank, bin_size=args.bin_size, body_bins=args.body_bins,
+                            smooth=args.smooth, formats=args.formats.split(","),
+                            region_label=args.region_label)
+        print("\n".join(paths))
+    elif args.command == "qc":
+        from .plotting import qc
+        paths, summary = qc(args.input, args.output_prefix, fraction=args.fraction,
+                            title=args.title, formats=args.formats.split(","))
+        print("\n".join(paths))
+        print(json.dumps(summary, indent=2))
     elif args.command == "lookup":
         import pandas as pd
         from .core import N_CPGS, bimodal_entropy, minimum_entropy

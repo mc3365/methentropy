@@ -1,4 +1,5 @@
 import gzip
+import os
 import json
 
 import numpy as np
@@ -194,3 +195,31 @@ def test_calibration_is_controlled(tmp_path):
     assert summary["frac_p_two_lt_0.05 (target <= 0.05)"] <= 0.08
     # the v1/v2 rule flags far more than 5% of linkage-free windows
     assert summary["old_method_frac_below_band_128reads (target ~0.05)"] > 0.5
+
+
+# ---------------------------------------------------------------- plotting
+def test_bin_layout_matches_enrichedheatmap_defaults():
+    from methentropy.plotting import BinLayout
+    lay = BinLayout()
+    assert (lay.n_flank, lay.n_bins) == (10, 67)
+    pos = np.array([-2001, -2000, -1, 0, 999, 1000, 1999, 2000, 3999, 4000])
+    b = lay.assign(pos, start=0, end=2000)
+    assert b.tolist() == [-1, 0, 9, 10, 33, 33, 56, 57, 66, -1]
+
+
+def test_metaplot_and_qc_run(rlm_file, tmp_path):
+    pytest.importorskip("matplotlib")
+    from methentropy.plotting import metaplot, qc
+    out = tmp_path / "w.tsv.gz"
+    run(rlm_file, out, n_sims=100)
+    regions = tmp_path / "r.bed"
+    regions.write_text("chr1\t100\t500\tA\textra\nchr1\t300\t700\tB\textra\n")
+    names = tmp_path / "keep.txt"
+    names.write_text("A\n")
+    paths, table = metaplot({"s1": [str(out)], "s2": [str(out), str(out)]}, regions,
+                            str(tmp_path / "mp"), names_path=names, body_bins=4,
+                            flank=200, bin_size=100, formats=("png",))
+    assert len(paths) == 2 and all(os.path.exists(p) for p in paths)
+    assert set(table["quantity"]) >= {"entropy", "null", "delta", "minimum", "bimodal"}
+    qpaths, summary = qc(out, str(tmp_path / "q"), fraction=1.0)
+    assert os.path.exists(qpaths[0]) and summary["windows"] == 8

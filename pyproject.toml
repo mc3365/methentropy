@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "methentropy"
-version = "3.0.0"
+version = "3.1.0"
 description = "Depth-matched null models for 4-CpG methylation entropy from RLM output"
 readme = "README.md"
 authors = [{ name = "Meiying Cui" }]
@@ -16,7 +16,8 @@ dependencies = ["numpy>=1.21", "pandas>=1.3"]
 Repository = "https://github.com/mc3365/methentropy"
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+plot = ["matplotlib>=3.5"]
+dev = ["pytest>=7", "matplotlib>=3.5"]
 
 [project.scripts]
 methentropy = "methentropy.cli:entry"
