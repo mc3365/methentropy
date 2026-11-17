@@ -18,6 +18,12 @@ def _workers(value):
     return int(slurm) if slurm else 1
 
 
+def pd_options():
+    import pandas as pd
+    return pd.option_context("display.width", 200, "display.max_columns", 30,
+                             "display.float_format", "{:.4g}".format)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="methentropy",
@@ -76,6 +82,20 @@ def main(argv=None):
     mp.add_argument("--smooth", type=int, default=3, help="moving-average width in bins (1 = off)")
     mp.add_argument("--formats", default="png,pdf")
 
+    cp = sub.add_parser("compare", help="per-region, replicate-aware comparison of conditions")
+    cp.add_argument("-s", "--sample", action="append", required=True, metavar="LABEL=FILE[,FILE...]",
+                    help="condition and its replicate result files; the first is the reference")
+    cp.add_argument("-r", "--regions", required=True, help="BED: chrom start end [name ...]")
+    cp.add_argument("--names", help="keep only regions whose name (see --name-column) is listed")
+    cp.add_argument("--name-column", type=int, default=4)
+    cp.add_argument("--flank", type=int, default=0, help="extend regions by this many bp")
+    cp.add_argument("--min-windows", type=int, default=3,
+                    help="regions with fewer windows in a replicate are skipped for it")
+    cp.add_argument("-o", "--output-prefix", required=True)
+    cp.add_argument("--title")
+    cp.add_argument("--region-label", default="region")
+    cp.add_argument("--formats", default="png,pdf")
+
     qp = sub.add_parser("qc", help="four-panel QC figure for one result file")
     qp.add_argument("-i", "--input", required=True, help="output of 'methentropy run'")
     qp.add_argument("-o", "--output-prefix", required=True)
@@ -122,6 +142,22 @@ def main(argv=None):
                             smooth=args.smooth, formats=args.formats.split(","),
                             region_label=args.region_label)
         print("\n".join(paths))
+    elif args.command == "compare":
+        from .compare import compare
+        samples = {}
+        for spec in args.sample:
+            if "=" not in spec:
+                raise ValueError(f"--sample needs LABEL=FILE[,FILE...], got {spec!r}")
+            label, files = spec.split("=", 1)
+            samples[label] = [f for f in files.split(",") if f]
+        summary, _, paths = compare(samples, args.regions, args.output_prefix,
+                                    names_path=args.names, name_column=args.name_column,
+                                    flank=args.flank, min_windows=args.min_windows,
+                                    title=args.title, region_label=args.region_label,
+                                    formats=args.formats.split(","))
+        print("\n".join(paths))
+        with pd_options():
+            print(summary.to_string(index=False))
     elif args.command == "qc":
         from .plotting import qc
         paths, summary = qc(args.input, args.output_prefix, fraction=args.fraction,

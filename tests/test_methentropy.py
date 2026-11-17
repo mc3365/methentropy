@@ -220,6 +220,42 @@ def test_metaplot_and_qc_run(rlm_file, tmp_path):
                             str(tmp_path / "mp"), names_path=names, body_bins=4,
                             flank=200, bin_size=100, formats=("png",))
     assert len(paths) == 2 and all(os.path.exists(p) for p in paths)
-    assert set(table["quantity"]) >= {"entropy", "null", "delta", "minimum", "bimodal"}
+    assert set(table["quantity"]) >= {"entropy", "null_mean", "delta", "minimum", "bimodal"}
     qpaths, summary = qc(out, str(tmp_path / "q"), fraction=1.0)
     assert os.path.exists(qpaths[0]) and summary["windows"] == 8
+
+
+def test_compare_detects_gain_in_linkage(tmp_path):
+    pytest.importorskip("scipy")
+    pytest.importorskip("matplotlib")
+    from methentropy.compare import compare
+    rng = np.random.default_rng(3)
+    regions, results = [], {"A": [], "B": []}
+    starts = [1000 * i for i in range(30)]
+    for i, s in enumerate(starts):
+        regions.append(f"chr1\t{s}\t{s + 600}\tr{i}")
+    for cond, linked in (("A", False), ("B", True)):
+        for rep in range(3):
+            wins = []
+            for s in starts:
+                for k in range(6):
+                    p = rng.uniform(0.3, 0.7)
+                    wins.append(synth_window(rng, 30, [p] * 4, linked=linked and k % 2 == 0))
+            path = tmp_path / f"{cond}{rep}.bed"
+            write_rlm(path, wins)
+            df = pd.read_csv(path, sep="\t", comment="#", header=None)
+            df[1] = [s + 100 * k for s in starts for k in range(6)]
+            df[2] = df[1] + 2
+            with open(path, "w") as h:
+                h.write("#chr\n")
+                df.to_csv(h, sep="\t", header=False, index=False)
+            out = tmp_path / f"{cond}{rep}.tsv"
+            run(path, out, n_sims=200, seed=rep)
+            results[cond].append(str(out))
+    bed = tmp_path / "r.bed"
+    bed.write_text("\n".join(regions) + "\n")
+    summary, table, paths = compare(results, bed, str(tmp_path / "cmp"), formats=("png",))
+    d = summary[summary.metric == "delta"].iloc[0]
+    assert d.n_regions == 30 and d.median_diff < 0 and d.wilcoxon_p_regions < 1e-4
+    assert d.welch_p_replicates < 0.05
+    assert os.path.exists(paths[0])

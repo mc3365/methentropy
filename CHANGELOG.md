@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.2.0
+- `methentropy compare`: per-region means for every replicate (observed - null,
+  scaled entropy, methylation); conditions compared against the first with a
+  paired Wilcoxon test over regions, a Welch test over replicate means and
+  per-region Welch tests with BH; summary/region tables and a figure.
+- Workflow schematic (`docs/figures/methentropy_workflow.{svg,png}`, script
+  `make_workflow.py`) shown at the top of the README.
+- Metaplot profile table: quantity `null` renamed to `null_mean` (the old name
+  is read as missing by pandas and some R readers).
+- `scipy` added to the `plot` extra.
+
 ## 3.1.0
 - `methentropy metaplot`: median (IQR) profiles of observed, null, bimodal and
   minimum entropy plus methylation over scaled regions with flanks, the design of

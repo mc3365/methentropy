@@ -31,7 +31,7 @@ INK, INK_2, MUTED, GRID = "#0b0b0b", "#52514e", "#8a8984", "#e6e5e0"
 # profiled quantity -> (result column(s) to try, label, colour, line style)
 PROFILE_SERIES = {
     "entropy": (("entropy",), "Observed", BLUE, "-"),
-    "null": (("null_mean", "pooled_mean"), "Stochastic (null)", ORANGE, "-"),
+    "null_mean": (("null_mean", "pooled_mean"), "Stochastic (null)", ORANGE, "-"),
     "bimodal": (("entropy_bimodal",), "Bimodal / allelic", AQUA, "-"),
     "minimum": (("entropy_min",), "Minimum", MUTED, "--"),
     "methylation": (("methylation",), "Methylation", INK, ":"),
@@ -284,7 +284,7 @@ def metaplot(samples, regions_path, out_prefix, names_path=None, name_column=4,
             if key not in s:
                 continue
             med, q25, q75, _ = s[key]
-            if key in ("entropy", "null", "bimodal"):
+            if key in ("entropy", "null_mean", "bimodal"):
                 ax.fill_between(x, _smooth(q25, smooth), _smooth(q75, smooth), color=color,
                                 alpha=0.15, lw=0)
             y = _smooth(med, smooth)
@@ -356,7 +356,7 @@ def qc(result_path, out_prefix, fraction=0.05, max_points=1_500_000, seed=1,
     header = pd.read_csv(result_path, sep="\t", nrows=0).columns
     cols = _resolve_columns(header)
     want = ["coverage" if "coverage" in header else "assumed_coverage", "methylation",
-            *[cols[k] for k in ("entropy", "null", "bimodal", "minimum") if k in cols]]
+            *[cols[k] for k in ("entropy", "null_mean", "bimodal", "minimum") if k in cols]]
     for extra in ("delta", "p_two", "q_two"):
         c = cols.get("delta") if extra == "delta" else extra
         if c and c in header:
@@ -386,7 +386,7 @@ def qc(result_path, out_prefix, fraction=0.05, max_points=1_500_000, seed=1,
     edges = np.linspace(0, 1, 26)
     mid = (edges[:-1] + edges[1:]) / 2
     which = np.clip(np.digitize(df["methylation"], edges) - 1, 0, len(mid) - 1)
-    for key in ("entropy", "null", "bimodal", "minimum"):
+    for key in ("entropy", "null_mean", "bimodal", "minimum"):
         if key not in cols:
             continue
         _c, name, color, ls = PROFILE_SERIES[key]

@@ -5,6 +5,8 @@
 Depth-matched null models for 4-CpG methylation entropy computed by
 [RLM](https://github.com/sarahet/RLM) from bisulfite sequencing data.
 
+[![methentropy workflow](docs/figures/methentropy_workflow.png)](docs/figures/methentropy_workflow.png)
+
 **Question addressed:** is the methylation entropy of a region explained by its
 methylation level and read depth alone, or are CpGs on the same molecule more
 (or less) coordinated than chance?
@@ -71,7 +73,7 @@ methentropy lookup --nreads 16 32 128 -o min_entropy_lookup.tsv
 
 ## Figures
 
-Needs matplotlib: `pip install -e '.[plot]'`.
+Needs matplotlib and scipy: `pip install -e '.[plot]'`.
 
 ```bash
 # metaplot over scaled regions (v1 design), replicates averaged per condition
@@ -93,6 +95,23 @@ axis) and `<prefix>_profile.tsv` (the plotted numbers). Regions are scaled to
 `--body-bins` (47) with `--flank` (2 kb) in `--bin-size` (200 bp) bins on both
 sides, matching EnrichedHeatmap `extend = 2000, w = 200, target_ratio = 0.7`.
 `--names` keeps regions whose `--name-column` (default 4) is listed in a file.
+
+`compare` tests conditions region by region, with replicates kept separate:
+
+```bash
+methentropy compare \
+    -s "Unpassaged=p_1_1.tsv.gz,p_1_2.tsv.gz,p_1_3.tsv.gz" \
+    -s "Passage 0=p0_1.tsv.gz,p0_2.tsv.gz,p0_3.tsv.gz" \
+    -s "Passage 5=p5_1.tsv.gz,p5_2.tsv.gz,p5_3.tsv.gz" \
+    -r DMVs_label.bed --names hyper_dmvs.txt --region-label DMV -o figs/hyper_dmv
+```
+
+Per region and replicate it averages observed − null and computes the scaled
+entropy (sum-based, so near-zero-variance windows do not dominate). Every
+condition is compared with the first: paired Wilcoxon over regions, Welch over
+replicate means (the conservative test with n = replicates), and per-region
+Welch tests with BH. Outputs: `<prefix>_summary.tsv`, `<prefix>_regions.tsv`,
+`<prefix>_compare.{png,pdf}`.
 
 `qc` writes `<prefix>_qc.png` and `<prefix>_qc_summary.tsv`: entropy vs
 methylation with the references, the distribution of observed − null, observed −
