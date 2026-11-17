@@ -66,7 +66,7 @@ out.append('<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWi
            f'markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" '
            f'fill="{LINE}"/></marker></defs>')
 rect(0, 0, W, H, fill="white", stroke="none", rx=0)
-text(30, 44, "methentropy — is read-level methylation more ordered than chance?", size=24,
+text(30, 44, "methentropy: Is read-level methylation more ordered than chance?", size=24,
      weight=600, anchor="start")
 text(30, 72, "Every reference is computed at the window's own read depth, so finite-sample "
      "entropy bias is shared by observation and null.", size=15, color=INK2, anchor="start")
