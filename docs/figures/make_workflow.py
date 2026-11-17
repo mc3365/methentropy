@@ -99,7 +99,7 @@ for x, t, b in zip(bx, titles, bodies):
     text(x + 175, 214, b, size=15, color=INK2)
 # mini illustrations: 8 reads x 4 CpGs
 rng = np.random.default_rng(4)
-same = [[1, 1, 0, 0]] * 4 + [[0, 0, 0, 0]] * 4
+same = [[1, 0, 0, 0]] * 8  # every read the same pattern: entropy 0
 grid(bx[0] + 152, 345, same, label="identical patterns")
 bim = [[1, 1, 1, 1]] * 4 + [[0, 0, 0, 0]] * 4
 grid(bx[1] + 152, 345, bim, label="all-or-none reads")
