@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.2.1
+- `docs/interpreting_output.md`: every output column explained on a worked
+  window (null, null_mean, minimum, bimodal, delta, scaled entropy, z,
+  p_low/p_high/p_two, BH q) and where each appears in the qc, metaplot,
+  compare and aggregate outputs; the example is checked by the test-suite.
+- Workflow schematic: minimum example now shows identical reads (entropy 0).
+
 ## 3.2.0
 - `methentropy compare`: per-region means for every replicate (observed - null,
   scaled entropy, methylation); conditions compared against the first with a

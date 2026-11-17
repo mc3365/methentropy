@@ -121,6 +121,10 @@ up as a bar at 1.
 
 ## Output of `run`
 
+A worked example of every column, and where each one appears in the figures,
+is in [docs/interpreting_output.md](docs/interpreting_output.md).
+
+
 | column | meaning |
 |---|---|
 | `coverage` | reads spanning the 4-mer (N) |

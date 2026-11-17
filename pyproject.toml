@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "methentropy"
-version = "3.2.0"
+version = "3.2.1"
 description = "Depth-matched null models for 4-CpG methylation entropy from RLM output"
 readme = "README.md"
 authors = [{ name = "Meiying Cui" }]

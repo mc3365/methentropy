@@ -1,5 +1,8 @@
 # Methods
 
+For a column-by-column guide with a worked window, see
+[interpreting_output.md](interpreting_output.md).
+
 ## Quantity
 
 For a 4-mer of consecutive CpGs spanned by N complete reads with epiallele

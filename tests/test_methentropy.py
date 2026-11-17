@@ -259,3 +259,19 @@ def test_compare_detects_gain_in_linkage(tmp_path):
     assert d.n_regions == 30 and d.median_diff < 0 and d.wilcoxon_p_regions < 1e-4
     assert d.welch_p_replicates < 0.05
     assert os.path.exists(paths[0])
+
+
+def test_docs_worked_example():
+    """Numbers quoted in docs/interpreting_output.md."""
+    c = np.zeros(16, dtype=int)
+    c[15], c[14], c[0] = 6, 2, 12          # GGGG, GGGg, gggg
+    n, m = c.sum(), per_cpg_methylated(c)
+    assert m.tolist() == [8, 8, 8, 6]
+    h = float(entropy_from_counts(c))
+    assert round(h, 3) == 0.324
+    assert round(minimum_entropy(n, m.sum()), 3) == 0.203
+    assert round(bimodal_entropy(n, m.sum()), 3) == 0.243
+    sims = simulate_independent(independent_key(n, m), 1000, seed=1)
+    assert round(sims.mean(), 3) == 0.828 and round(sims.std(ddof=1), 3) == 0.039
+    p_low, p_high = empirical_pvalues(sims, np.array([h]))
+    assert p_low[0] == pytest.approx(1 / 1001) and p_high[0] == 1.0
